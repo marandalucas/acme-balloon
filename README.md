@@ -47,6 +47,7 @@ The following table lists the configurable parameters and their default values:
 | `container.resources.requests.cpu` | CPU request | `1m` |
 | `container.resources.requests.memory` | Memory request | `8Mi` |
 | `terminationGracePeriodSeconds` | Grace period for pod termination | `0` |
+| `priorityClassName` | Override PriorityClass name (if using existing) | `acme-balloon-priority` |
 | `tolerations` | Pod tolerations | See values.yaml |
 | `affinity` | Pod affinity rules | See values.yaml |
 | `topologySpreadConstraints` | Topology spread constraints | See values.yaml |
@@ -85,9 +86,10 @@ affinity:
 
 This chart creates the following Kubernetes resources:
 
-1. **Namespace**: Creates a dedicated namespace for ACME Balloon pods
-2. **PriorityClass**: Creates a low-priority class for balloon pods
-3. **Deployment**: Creates the deployment with configurable replicas
+1. **PriorityClass**: Creates a low-priority class for balloon pods (if it doesn't already exist)
+2. **Deployment**: Creates the deployment with configurable replicas
+
+**Note**: The namespace is created automatically by Helm using the `--create-namespace` flag during installation.
 
 ## Priority Class
 
@@ -95,6 +97,16 @@ The chart creates a PriorityClass named `acme-balloon-priority` with:
 - Value: `-10` (configurable)
 - PreemptionPolicy: `Never` (balloon pods will not preempt other pods)
 - GlobalDefault: `false`
+
+**Important**: If a PriorityClass with the same name already exists in your cluster (e.g., from a previous deployment), Helm will fail during installation. In this case, you have two options:
+
+1. **Use the existing PriorityClass**: Set `priorityClassName` in values.yaml to match the existing PriorityClass name
+2. **Skip PriorityClass creation**: The chart will attempt to create it, and if it fails, you can manually apply the deployment template without the PriorityClass
+
+To use an existing PriorityClass, add to your values.yaml:
+```yaml
+priorityClassName: existing-priority-class-name
+```
 
 ## Scaling
 
@@ -116,11 +128,13 @@ To uninstall the chart:
 helm uninstall acme-balloon --namespace acme-balloon
 ```
 
-**Note**: This will remove the deployment and priority class, but the namespace will remain. To remove the namespace as well:
-
-```bash
-kubectl delete namespace acme-balloon
-```
+**Note**: 
+- This will remove the deployment and priority class (if created by this Helm release)
+- The namespace will remain. To remove the namespace as well:
+  ```bash
+  kubectl delete namespace acme-balloon
+  ```
+- If the PriorityClass was created by another Helm release or manually, it will not be removed
 
 ## Advanced Configuration
 
@@ -187,10 +201,25 @@ serviceAccountName: acme-balloon-sa
 
 ### Priority Class Issues
 
-Verify the priority class was created:
-```bash
-kubectl get priorityclass acme-balloon-priority
-```
+1. **PriorityClass already exists**: If you get an error about PriorityClass already existing:
+   ```bash
+   # Check existing PriorityClass
+   kubectl get priorityclass acme-balloon-priority
+   
+   # Option 1: Use existing PriorityClass by setting priorityClassName in values.yaml
+   # Option 2: Apply template without PriorityClass
+   helm template acme-balloon . | grep -v "kind: PriorityClass" -A 20 | kubectl apply -f -
+   ```
+
+2. **Verify the priority class exists**:
+   ```bash
+   kubectl get priorityclass acme-balloon-priority
+   ```
+
+3. **Check if pods are using the PriorityClass**:
+   ```bash
+   kubectl get pods -n acme-balloon -o jsonpath='{.items[*].spec.priorityClassName}'
+   ```
 
 ## Contributing
 

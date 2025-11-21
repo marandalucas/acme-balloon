@@ -5,6 +5,7 @@ replicas: 10
 priorityClass:
   balloon:
     value: -10
+# priorityClassName: acme-balloon-priority  # Override to use existing PriorityClass
 
 container:
   name: "acme-balloon"
