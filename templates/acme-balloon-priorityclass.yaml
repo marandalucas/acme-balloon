@@ -1,0 +1,12 @@
+---
+apiVersion: scheduling.k8s.io/v1
+kind: PriorityClass
+metadata:
+  name: acme-balloon-priority
+  labels:
+    {{- include "acme-balloon.labels" . | nindent 4 }}
+value: {{ .Values.priorityClass.balloon.value | default -10 }}
+preemptionPolicy: Never
+globalDefault: false
+description: "ACME Balloon pod priority."
+

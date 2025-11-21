@@ -1,0 +1,43 @@
+name: "acme-balloon"
+namespace: "acme-balloon"
+replicas: 10
+
+priorityClass:
+  balloon:
+    value: -10
+
+container:
+  name: "acme-balloon"
+  image: "debian:12-slim"
+  command: ["sleep"]
+  args: ["infinity"]
+  resources:
+    requests:
+      cpu: "1m"
+      memory: "8Mi"
+
+terminationGracePeriodSeconds: 0
+
+tolerations:
+  - key: "gke_node_type"
+    operator: "Equal"
+    value: "spot-default"
+    effect: "NoSchedule"
+
+affinity:
+  nodeAffinity:
+    requiredDuringSchedulingIgnoredDuringExecution:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: "gke_node_type"
+              operator: "In"
+              values: ["spot-default"]
+
+topologySpreadConstraints:
+  - labelSelector:
+      matchLabels:
+        app.kubernetes.io/name: acme-balloon
+    maxSkew: 1
+    topologyKey: "kubernetes.io/hostname"
+    whenUnsatisfiable: "ScheduleAnyway"
+
