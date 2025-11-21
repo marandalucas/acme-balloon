@@ -1,0 +1,19 @@
+# Helm
+*.tgz
+*.tar.gz
+
+# Docs (will be generated)
+# Keep index.yaml placeholder but ignore generated files
+docs/*.tgz
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+

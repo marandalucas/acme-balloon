@@ -18,7 +18,20 @@ ACME Balloon creates lightweight pods that:
 
 ## Installation
 
-### Basic Installation
+### From Public Helm Repository (Recommended)
+
+Add the repository:
+```bash
+helm repo add acme-balloon https://marandalucas.github.io/acme-balloon
+helm repo update
+```
+
+Install the chart:
+```bash
+helm install acme-balloon acme-balloon/acme-balloon --namespace acme-balloon --create-namespace
+```
+
+### From Local Chart
 
 ```bash
 helm install acme-balloon . --namespace acme-balloon --create-namespace
@@ -27,7 +40,7 @@ helm install acme-balloon . --namespace acme-balloon --create-namespace
 ### Installation with Custom Values
 
 ```bash
-helm install acme-balloon . -f custom-values.yaml --namespace acme-balloon --create-namespace
+helm install acme-balloon acme-balloon/acme-balloon -f custom-values.yaml --namespace acme-balloon --create-namespace
 ```
 
 ## Configuration
@@ -117,7 +130,7 @@ You can scale the deployment using:
 kubectl scale deployment acme-balloon -n acme-balloon --replicas=20
 
 # Or update values and upgrade
-helm upgrade acme-balloon . --set replicas=20
+helm upgrade acme-balloon acme-balloon/acme-balloon --set replicas=20
 ```
 
 ## Uninstallation
@@ -221,11 +234,22 @@ serviceAccountName: acme-balloon-sa
    kubectl get pods -n acme-balloon -o jsonpath='{.items[*].spec.priorityClassName}'
    ```
 
+## Public Repository
+
+This chart is available from the public Helm repository:
+
+```bash
+helm repo add acme-balloon https://marandalucas.github.io/acme-balloon
+helm repo update
+helm search repo acme-balloon
+```
+
+Repository URL: https://marandalucas.github.io/acme-balloon
+
 ## Contributing
 
-This chart is maintained by the AppSpace Cloud Team. For issues or contributions, please contact the team.
+Contributions are welcome! Please feel free to submit a Pull Request.
 
 ## License
 
 Copyright (c) AppSpace. All rights reserved.
-
